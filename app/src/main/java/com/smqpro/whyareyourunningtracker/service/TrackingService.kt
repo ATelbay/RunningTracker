@@ -63,6 +63,10 @@ class TrackingService : LifecycleService() {
         })
     }
 
+    private fun pauseService() {
+        isTracking.postValue(false)
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.let {
             when (it.action) {
@@ -72,11 +76,13 @@ class TrackingService : LifecycleService() {
                         isFirstRun = false
                         Timber.d("Started service")
                     } else {
+                        startForegroundService()
                         Timber.d("Resumed service")
                     }
 
                 }
                 ACTION_PAUSE_SERVICE -> {
+                    pauseService()
                     Timber.d("Paused service")
                 }
                 ACTION_STOP_SERVICE -> {
@@ -145,7 +151,6 @@ class TrackingService : LifecycleService() {
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
             createNotificationService(notificationManager)
         }
 
