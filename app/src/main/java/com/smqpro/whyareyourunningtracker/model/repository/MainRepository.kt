@@ -1,7 +1,7 @@
-package com.smqpro.whyareyourunningtracker.repository
+package com.smqpro.whyareyourunningtracker.model.repository
 
-import com.smqpro.whyareyourunningtracker.db.Run
-import com.smqpro.whyareyourunningtracker.db.RunDao
+import com.smqpro.whyareyourunningtracker.model.db.Run
+import com.smqpro.whyareyourunningtracker.model.db.RunDao
 import javax.inject.Inject
 
 class MainRepository @Inject constructor(

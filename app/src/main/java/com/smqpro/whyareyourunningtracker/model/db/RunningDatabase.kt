@@ -1,4 +1,4 @@
-package com.smqpro.whyareyourunningtracker.db
+package com.smqpro.whyareyourunningtracker.model.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

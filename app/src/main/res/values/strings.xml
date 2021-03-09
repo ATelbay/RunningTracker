@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">RunningApp</string>
+    <string name="app_name">WhyAreYouRunning Tracker</string>
     <string name="your_runs">Your runs</string>
     <string name="statistics">Statistics</string>
     <string name="settings">Settings</string>

@@ -1,9 +1,9 @@
-package com.smqpro.whyareyourunningtracker.di
+package com.smqpro.whyareyourunningtracker.utility.di
 
 import android.content.Context
 import androidx.room.Room
-import com.smqpro.whyareyourunningtracker.Constants.RUNNING_DATABASE_NAME
-import com.smqpro.whyareyourunningtracker.db.RunningDatabase
+import com.smqpro.whyareyourunningtracker.utility.Constants.RUNNING_DATABASE_NAME
+import com.smqpro.whyareyourunningtracker.model.db.RunningDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
