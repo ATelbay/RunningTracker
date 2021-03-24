@@ -10,18 +10,22 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.smqpro.whyareyourunningtracker.R
+import com.smqpro.whyareyourunningtracker.adapter.RunAdapter
 import com.smqpro.whyareyourunningtracker.databinding.FragmentRunBinding
 import com.smqpro.whyareyourunningtracker.ui.main.MainViewModel
 import com.smqpro.whyareyourunningtracker.utility.Constants.REQUEST_CODE_LOCATION_PERMISSION
 import com.smqpro.whyareyourunningtracker.utility.TrackingUtility
+import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
+import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class RunFragment : Fragment(), EasyPermissions.PermissionCallbacks {
     private var _binding: FragmentRunBinding? = null
     private val binding get() = _binding!!
     private val viewModel: MainViewModel by viewModels()
+    private val runAdapter = RunAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,6 +45,21 @@ class RunFragment : Fragment(), EasyPermissions.PermissionCallbacks {
     }
 
     private fun setUi() = binding.apply {
+        setRv()
+        observeLiveData()
+        setListeners()
+    }
+
+    private fun setRv() = binding.rvRuns.apply {
+        adapter = runAdapter
+
+    }
+
+    private fun observeLiveData() = viewModel.runListSortedByDate.observe(viewLifecycleOwner) {
+        runAdapter.submitList(it)
+    }
+
+    private fun setListeners() = binding.apply {
         fab.setOnClickListener {
             findNavController().navigate(R.id.action_runFragment_to_trackingFragment)
         }
