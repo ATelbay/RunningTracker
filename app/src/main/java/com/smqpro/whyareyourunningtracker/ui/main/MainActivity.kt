@@ -11,14 +11,17 @@ import com.smqpro.whyareyourunningtracker.R
 import com.smqpro.whyareyourunningtracker.databinding.ActivityMainBinding
 import com.smqpro.whyareyourunningtracker.utility.Constants.ACTION_SHOW_TRACKING_FRAGMENT
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
+    @set:Inject
+    var name = ""
+
     private lateinit var binding: ActivityMainBinding
     private val navHostFrag: NavHostFragment by lazy {
-        supportFragmentManager.findFragmentById(
-            R.id.nav_host_fragment
-        ) as NavHostFragment
+        supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
     }
 
 
@@ -26,9 +29,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
 
-        navigateToTrackingFragment(intent)
-
         setUi()
+
+        navigateToTrackingFragment(intent)
 
     }
 
@@ -54,11 +57,23 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+
+        bottomNavigationView.setupWithNavController(navHostFrag.findNavController())
+
+        if (name.trim().isNotEmpty()) {
+            val toolbarText = "Let's go, $name!"
+            setToolbarTitle(toolbarText)
+        }
+
     }
 
     private fun navigateToTrackingFragment(intent: Intent?) {
         if (intent?.action == ACTION_SHOW_TRACKING_FRAGMENT) {
             navHostFrag.findNavController().navigate(R.id.action_global_to_trackingFragment)
         }
+    }
+
+    fun setToolbarTitle(text: String) {
+        binding.tvToolbarTitle.text = text
     }
 }

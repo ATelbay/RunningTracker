@@ -6,12 +6,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.smqpro.whyareyourunningtracker.R
 import com.smqpro.whyareyourunningtracker.adapter.RunAdapter
 import com.smqpro.whyareyourunningtracker.databinding.FragmentRunBinding
+import com.smqpro.whyareyourunningtracker.model.enum.SortType
 import com.smqpro.whyareyourunningtracker.ui.main.MainViewModel
 import com.smqpro.whyareyourunningtracker.utility.Constants.REQUEST_CODE_LOCATION_PERMISSION
 import com.smqpro.whyareyourunningtracker.utility.TrackingUtility
@@ -45,9 +47,15 @@ class RunFragment : Fragment(), EasyPermissions.PermissionCallbacks {
     }
 
     private fun setUi() = binding.apply {
-        setRv()
+        setViews()
         observeLiveData()
         setListeners()
+    }
+
+    private fun setViews() = binding.apply {
+        spFilter.setSelection(viewModel.sortType.ordinal)
+
+        setRv()
     }
 
     private fun setRv() = binding.rvRuns.apply {
@@ -55,13 +63,24 @@ class RunFragment : Fragment(), EasyPermissions.PermissionCallbacks {
 
     }
 
-    private fun observeLiveData() = viewModel.runListSortedByDate.observe(viewLifecycleOwner) {
+    private fun observeLiveData() = viewModel.runList.observe(viewLifecycleOwner) {
         runAdapter.submitList(it)
     }
 
     private fun setListeners() = binding.apply {
         fab.setOnClickListener {
             findNavController().navigate(R.id.action_runFragment_to_trackingFragment)
+        }
+
+        spFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p0: AdapterView<*>?, view: View?, pos: Int, id: Long) {
+                viewModel.sortRuns(SortType.values()[pos])
+            }
+
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+
+            }
+
         }
     }
 
