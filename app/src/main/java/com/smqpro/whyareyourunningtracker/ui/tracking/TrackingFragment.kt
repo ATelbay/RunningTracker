@@ -6,12 +6,10 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navGraphViewModels
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.PolylineOptions
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.smqpro.whyareyourunningtracker.R
 import com.smqpro.whyareyourunningtracker.databinding.FragmentTrackingBinding
@@ -30,6 +28,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 import javax.inject.Inject
 import kotlin.math.round
+
+const val CANCEL_DIALOG_FRAGMENT_TAG = "CancelDialog"
 
 @AndroidEntryPoint
 class TrackingFragment : Fragment() {
@@ -55,7 +55,13 @@ class TrackingFragment : Fragment() {
     ): View {
         _binding = FragmentTrackingBinding.inflate(inflater, container, false)
 
+        val cancelDialogFragment =
+            parentFragmentManager.findFragmentByTag(CANCEL_DIALOG_FRAGMENT_TAG) as CancelDialogFragment?
+        cancelDialogFragment?.setPositiveButtonClickListener{ stopRun() }
+
         binding.mapView.onCreate(savedInstanceState)
+
+
 
         setUi()
 
@@ -144,31 +150,26 @@ class TrackingFragment : Fragment() {
     }
 
     private fun showCancelTrackingDialog() {
-        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.AlertDialogTheme)
-            .setTitle("Cancel the Run?")
-            .setMessage("Are you sure to cancel the current run and delete all its data")
-            .setIcon(R.drawable.ic_delete)
-            .setPositiveButton("Yes") { _, _ ->
+
+        CancelDialogFragment().apply {
+            setPositiveButtonClickListener {
                 stopRun()
             }
-            .setNegativeButton("No") { dialogInterface, _ ->
-                dialogInterface.cancel()
-            }
-            .create()
-        dialog.show()
+        }.show(parentFragmentManager, CANCEL_DIALOG_FRAGMENT_TAG)
     }
 
     private fun stopRun() {
         sendCommandToService(ACTION_STOP_SERVICE)
+        binding.tvTimer.text = "00:00:00:00"
         findNavController().navigate(R.id.action_trackingFragment_to_runFragment)
     }
 
     private fun updateTracking(isTracking: Boolean) = binding.apply {
         this@TrackingFragment.isTracking = isTracking
-        if (!isTracking) {
+        if (!isTracking && currentTimeInMillis > 0L) {
             btnToggleRun.text = "Start"
             btnFinishRun.visibility = View.VISIBLE
-        } else {
+        } else if (isTracking) {
             btnToggleRun.text = "Stop"
             btnFinishRun.visibility = View.GONE
             menu?.getItem(0)?.isVisible = true
@@ -199,10 +200,18 @@ class TrackingFragment : Fragment() {
             pathPoints.forEach { polyline ->
                 distanceInMeters += TrackingUtility.calculatePolylineLength(polyline).toInt()
             }
-            val avgSpeed = round((distanceInMeters / 1000F) / (currentTimeInMillis / 1000F / 60 / 60) * 10) / 10f
+            val avgSpeed =
+                round((distanceInMeters / 1000F) / (currentTimeInMillis / 1000F / 60 / 60) * 10) / 10f
             val dateTimestamp = Calendar.getInstance().timeInMillis
             val caloriesBurned = ((distanceInMeters / 1000f) * weight).toInt()
-            val run = Run(bmp, dateTimestamp, avgSpeed, distanceInMeters, currentTimeInMillis, caloriesBurned)
+            val run = Run(
+                bmp,
+                dateTimestamp,
+                avgSpeed,
+                distanceInMeters,
+                currentTimeInMillis,
+                caloriesBurned
+            )
             viewModel.insertRun(run)
             Snackbar.make(
                 requireActivity().findViewById(R.id.rootView),
@@ -270,12 +279,17 @@ class TrackingFragment : Fragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        binding.mapView.onSaveInstanceState(outState)
+        _binding?.mapView?.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         binding.mapView.onDestroy()
         _binding = null
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
     }
 }

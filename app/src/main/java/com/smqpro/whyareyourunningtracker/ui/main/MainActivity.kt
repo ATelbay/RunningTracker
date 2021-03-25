@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         bottomNavigationView.setupWithNavController(navHostFrag.findNavController())
+        bottomNavigationView.setOnNavigationItemReselectedListener {  }
 
         if (name.trim().isNotEmpty()) {
             val toolbarText = "Let's go, $name!"
